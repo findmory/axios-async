@@ -1,0 +1,15 @@
+{
+  "name": "async-axios",
+  "version": "1.0.0",
+  "description": "Axios fork that wraps some custom retry logic and handlers that run during retry",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mike ory",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "delay": "^4.3.0"
+  }
+}
