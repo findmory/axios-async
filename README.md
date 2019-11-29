@@ -47,7 +47,7 @@ let config = {
   retryCallback: <function>,
 
   /* Explicit Success Codes. List of resp codes to consider success */
-  successCodes: <list>
+  successCodes: <array>
 
 }
 ```
