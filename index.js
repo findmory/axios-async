@@ -5,26 +5,22 @@ module.exports = async config => {
   // destructure config
   let { url, method, data, timeout, retryDelay, retryingCallback } = config;
 
-  // set defaults
-
   // url is required.  do something if we don't have it
   config = {
     url: url,
-    method: !method ? "get" : method,
-    data: !data ? null : data,
-    timeout: !timeout ? 3000 : timeout,
-    retryDelay: !retryDelay ? 200 : retryDelay,
-    retryingCallback: !retryingCallback ? () => {} : retryingCallback
+    method: method || "get",
+    data: data || null,
+    timeout: timeout || 3000,
+    retryDelay: retryDelay || 200,
+    retryingCallback: retryingCallback || null
   };
-
-  console.log(config);
 
   let retryLooper = true;
   let resp;
   do {
     resp = await _axiosAsync(config);
     if (!resp) {
-      retryingCallback();
+      retryingCallback ? retryingCallback() : null;
       console.log("delaying for", retryDelay);
       await delay(retryDelay);
       retryLooper = true;
@@ -36,7 +32,6 @@ module.exports = async config => {
 };
 
 _axiosAsync = async config => {
-  console.log("starting axios");
   let _config = {};
   _config.url = config.url;
   _config.method = config.method;
