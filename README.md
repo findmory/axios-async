@@ -43,8 +43,11 @@ let config = {
   */
   retries: <integer>,
 
-  /* callback to run during retry*/
-  retryCallback: <function>
+  /* callback to run during retry */
+  retryCallback: <function>,
+
+  /* Explicit Success Codes. List of resp codes to consider success */
+  successCodes: <list>
 
 }
 ```

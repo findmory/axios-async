@@ -11,7 +11,8 @@ module.exports = async config => {
     retryDelay,
     retryingCallback,
     retryType,
-    retries
+    retries,
+    successCodes
   } = config;
 
   // url is required.  do something if we don't have it
@@ -23,7 +24,8 @@ module.exports = async config => {
     retryDelay: retryDelay || 200,
     retryingCallback: retryingCallback || null,
     retryType: retryType || "static",
-    retries: retries || 0
+    retries: retries || 0,
+    successCodes: successCodes || []
   };
 
   let retryLooper = true;
@@ -85,8 +87,7 @@ _axiosAsync = async config => {
     // even though certain errors are caught we can consider them success
     if (
       err.response &&
-      err.response.status >= 400 &&
-      err.response.status <= 500
+      config.successCodes.includes(err.response.status)
     ) {
       return err.response;
     }
