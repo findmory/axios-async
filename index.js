@@ -3,7 +3,15 @@ const axios = require("axios");
 
 module.exports = async config => {
   // destructure config
-  let { url, method, data, timeout, retryDelay, retryingCallback } = config;
+  let {
+    url,
+    method,
+    data,
+    timeout,
+    retryDelay,
+    retryingCallback,
+    retryType
+  } = config;
 
   // url is required.  do something if we don't have it
   config = {
@@ -12,17 +20,33 @@ module.exports = async config => {
     data: data || null,
     timeout: timeout || 3000,
     retryDelay: retryDelay || 200,
-    retryingCallback: retryingCallback || null
+    retryingCallback: retryingCallback || null,
+    retryType: retryType || "static"
   };
 
   let retryLooper = true;
+  let retryCount = 0;
+  let retryDelayCalc = retryDelay;
   let resp;
   do {
     resp = await _axiosAsync(config);
     if (!resp) {
+      retryCount++;
       retryingCallback ? retryingCallback() : null;
-      console.log("delaying for", retryDelay);
-      await delay(retryDelay);
+
+      switch (retryType) {
+        case "exponential":
+          retryDelayCalc = ((Math.pow(2, retryCount) - 1) / 2) * 1000;
+          break;
+        case "linear":
+          retryDelayCalc = retryCount * retryDelay;
+          break;
+        default:
+          retryDelayCalc = retryDelay;
+          break;
+      }
+      console.log(`delaying for ${retryDelayCalc}`);
+      await delay(retryDelayCalc);
       retryLooper = true;
     } else {
       retryLooper = false;
