@@ -10,7 +10,8 @@ module.exports = async config => {
     timeout,
     retryDelay,
     retryingCallback,
-    retryType
+    retryType,
+    retries
   } = config;
 
   // url is required.  do something if we don't have it
@@ -21,33 +22,43 @@ module.exports = async config => {
     timeout: timeout || 3000,
     retryDelay: retryDelay || 200,
     retryingCallback: retryingCallback || null,
-    retryType: retryType || "static"
+    retryType: retryType || "static",
+    retries: retries || 0
   };
 
   let retryLooper = true;
   let retryCount = 0;
-  let retryDelayCalc = retryDelay;
+  let retryDelayCalc = config.retryDelay;
   let resp;
   do {
     resp = await _axiosAsync(config);
     if (!resp) {
+      // are we out of retries?
+      
+      if (retryCount >= config.retries && config.retries !== -1) {
+        retryLooper = false;
+        continue;
+      }
       retryCount++;
-      retryingCallback ? retryingCallback() : null;
+      config.retryingCallback ? config.retryingCallback() : null;
 
       switch (retryType) {
         case "exponential":
           retryDelayCalc = ((Math.pow(2, retryCount) - 1) / 2) * 1000;
           break;
         case "linear":
-          retryDelayCalc = retryCount * retryDelay;
+          retryDelayCalc = retryCount * config.retryDelay;
           break;
         default:
-          retryDelayCalc = retryDelay;
+          retryDelayCalc = config.retryDelay;
           break;
       }
+
+    
       console.log(`delaying for ${retryDelayCalc}`);
       await delay(retryDelayCalc);
       retryLooper = true;
+      
     } else {
       retryLooper = false;
     }
@@ -68,6 +79,17 @@ _axiosAsync = async config => {
     return resp;
   } catch (err) {
     console.log("handling the error");
+    // console.log(err.response.status);
+    // console.log(err.response.data);
+
+    // even though certain errors are caught we can consider them success
+    if (
+      err.response &&
+      err.response.status >= 400 &&
+      err.response.status <= 500
+    ) {
+      return err.response;
+    }
     return false;
   }
 };
