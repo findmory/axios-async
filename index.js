@@ -51,6 +51,13 @@ _axiosAsync = async config => {
     return resp;
   } catch (err) {
     console.log("handling the error");
+    // even though certain errors are caught we can consider them success
+    if (
+      err.response &&
+      config.successCodes.includes(err.response.status)
+    ) {
+      return err.response;
+    }
     return false;
   }
 };
