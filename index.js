@@ -10,6 +10,7 @@ module.exports = async config => {
     timeout: config.timeout || 3000,
     retryDelay: config.retryDelay || 200,
     retryType: config.retryType || "static",
+    successCodes: config.successCodes || []
   };
 
   let _config = {...config, ...requiredParms};
